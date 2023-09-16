@@ -36,6 +36,7 @@ async function sendSMS(recipientPhone, message) {
 
     const headers = {
       'Authorization': `Bearer ${accessToken}`,
+      // 'Authorization': `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     };
 

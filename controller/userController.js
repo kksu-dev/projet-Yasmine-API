@@ -2,11 +2,21 @@
 // const Utilisateur = require('../models/Utilisateur');
 const bcrypt = require('bcrypt');
 const { Utilisateur,Otp } = require('../models');
+// const { sendEmail } = require('../mail/sendMail');
+const sendEmail = require('../mail/sendMail');
+
 const multer = require('multer');
 const fs = require('fs');
 const sharp = require('sharp');
+const jwt = require('jsonwebtoken');
+require('dotenv');
+
+const crypto = require('crypto');
+
+
+
 // const { sendSMS } = require('../sms/senderSms');
-const { sendSMS } = require('../sms/senderSms');
+const { sendSMS } = require('../sms/sendSms');
 
 // Fonction pour créer un nouvel utilisateur
 const Storage = multer.diskStorage(
@@ -47,6 +57,7 @@ const registerUser = async (req, res, next) => {
             // Vérifier si l'utilisateur existe déjà
             const email = req.body.email;
             const telephone = req.body.telephone;
+
             const existingUser = await Utilisateur.findOne({ where: { email } });
             const numberUser = await Utilisateur.findOne({ where: { telephone } });
             if (existingUser) {
@@ -72,23 +83,28 @@ const registerUser = async (req, res, next) => {
               dateNaissance:req.body.dateNaissance,
               genre:req.body.genre,
             });
-        
-            // return res.status(201).json(newUser);
-            // const confirmationMessage = 'Utilisateur créé avec succès.';
-            const message = 'Vous avez reçu un Otp.';
-            const otpResult = await generateOtp(req, res);
-                // Envoyez le SMS de bienvenue à l'utilisateur
-            // await sendSMS('+2250757347693', message);
-            // try {
-            //     // Envoyez le SMS de bienvenue à l'utilisateur
-            //     await sendSMS('+2250757347693', message);
-            //     console.log('SMS envoyé avec succès');
-            //   } catch (error) {
-            //     console.error('Erreur lors de l\'envoi du SMS :', error);
-            //   }
-            //   return res.status(200).json({ message:'Otp cree avec succes',data: newOtp });
 
-            return res.status(201).json({message: message, data: newUser});
+            
+              
+              const message = 'Vous avez reçu un Otp.';
+              const otpResult = await generateOtp();
+              sendEmail(
+                'koffisergeulrich@gmail.com',
+                'otp',
+                '\
+                <h1>Confirmation de votre mail</h1>\
+                <p>'+otpResult+'</p>\
+                <div style="color:red">je suis bien ainsi</div>',
+              (error, info) => {
+                if (error) {
+                  console.log('Erreur lors de l\'envoi de l\'e-mail :', error);
+                } else {
+                  console.log('E-mail envoyé avec succès :', info.response);
+                }
+              }
+              );
+              return res.status(201).json({message: message, data: newUser});
+
           } catch (error) {
             if (error.name === 'SequelizeValidationError') {
                 // Si une erreur de validation Sequelize se produit, renvoyez une réponse avec le statut 400 (Bad Request) et les messages d'erreur
@@ -129,10 +145,26 @@ const validOtpUser = async (req,res) => {
       }
 };
 
+//connecter un utilisateur
+const connexionUser = async (req,res) => {
+
+    const { telephone, password } = req.body;
+  
+    // Recherchez l'utilisateur par son nom d'utilisateur
+    const utilisateur = await Utilisateur.findOne({ where: { telephone } });
+    // return res.json({message:utilisateur.nom}) ;
+    if (!utilisateur || !bcrypt.compareSync(password, utilisateur.password)) {
+      return res.status(401).json({ message: 'Nom d\'utilisateur ou mot de passe incorrect' });
+    }
+  
+    // Générez un token JWT
+    const token = jwt.sign({ utilisateur }, process.env.JWT_SECRET , { expiresIn: '24h' });
+    // const jwtSecret = crypto.randomBytes(32).toString('hex');
+    res.json({token:token});
+}
 
 
-
-
+//construire mon otp
 const generateNumericOtp = (length) => {
     const digits = '0123456789';
     let otp = '';
@@ -143,6 +175,7 @@ const generateNumericOtp = (length) => {
     return otp;
 };
 
+//generer l'otp
 const generateOtp = async (req,res) => {
     try {
         // Generate a 6-digit numeric OTP
@@ -153,6 +186,7 @@ const generateOtp = async (req,res) => {
             otp: otp,
             expires_at: expirationDate,
         });
+        return otp;
         // return res.status(200).json({ message:'Otp cree avec succes',data: newOtp });
     } catch (error) {
         console.error('Error generating OTP:', error);
@@ -163,15 +197,38 @@ const generateOtp = async (req,res) => {
 const testSms = async (req,res) => {
     try {
         // Envoyez le SMS de bienvenue à l'utilisateur
-        await sendSMS('+2250757347693', 'message');
+        await main();
         console.log('SMS envoyé avec succès');
       } catch (error) {
         console.error('Erreur lors de l\'envoi du SMS :', error);
       }
 }
+
+// const testmail = async (req,res) => {
+  
+//       // Envoyez le SMS de bienvenue à l'utilisateur
+//       sendEmail(
+//         'koffisergeulrich@gmail.com',
+//         'otp',
+//         '\
+//         <h1>Titre de l\'e-mail</h1>\
+//         <p>Contenu du message au format HTML</p>\
+//         <div style="color:red">je suis bien ainsi</div>',
+//       (error, info) => {
+//         if (error) {
+//           console.log('Erreur lors de l\'envoi de l\'e-mail :', error);
+//         } else {
+//           console.log('E-mail envoyé avec succès :', info.response);
+//         }
+//       }
+//       );
+   
+// }
 module.exports = {
   registerUser,
+  connexionUser,
   validOtpUser,
   generateOtp,
-  testSms
+  testSms,
+  // testmail
 };
