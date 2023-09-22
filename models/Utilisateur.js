@@ -98,6 +98,10 @@ module.exports = (sequelize, DataTypes) => {
     genre: {
       type: DataTypes.STRING,
     },
+    resetToken:{
+      type: DataTypes.STRING,
+      allowNull: true,
+    }
   }, {
     sequelize,
     modelName: 'Utilisateur',

@@ -11,7 +11,8 @@ require('dotenv');
     const user = req.user.utilisateur;
     res.json({ user });
   });
-
+//Route pour recuperer tous les utilisateurs
+router.get('/getUsers', userController.getAllUser);
 
 // Route pour s'inscrire sur l'app
 router.post('/register', userController.registerUser);
@@ -26,6 +27,10 @@ router.post('/connexion', userController.connexionUser);
 router.post('/generateOtp', userController.generateOtp);
 router.post('/validOtp', userController.validOtpUser);
 
+//route pour mettre a jour le mot de passe
+router.post('/reset-password', userController.restPassword);
+router.post('/verificationOtp', userController.verificationOtp);
+router.post('/changePassword', userController.changePassword);
 
 //teste sms
 router.post('/sms', userController.testSms);

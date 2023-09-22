@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const sequelize = require('./config/bdConnect'); // Assurez-vous que le chemin soit correct
+const sequelize = require('./config/bdConnect'); 
 const appRoutes = require('./routes/appRoute');
 
 // Middleware pour analyser les requêtes JSON
@@ -26,3 +26,9 @@ app.listen(PORT, '127.0.0.1', function () {
     
     console.log('API démarré avec succès sur le port : ' + PORT);
 });
+
+// DB_HOST=localhost
+// DB_PORT=3306
+// DB_NAME=monassocicom_yasmineBd
+// DB_USER=monassocicom_admin
+// DB_PASSWORD=Monasso@2022

@@ -16,9 +16,12 @@
   },
   "production": {
     "username": "root",
-    "password": null,
-    "database": "test",
+    "password": "root",
+    "database": "yasmineBd",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "port": "8889"
   }
 }
+
+
