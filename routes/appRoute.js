@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controller/userController');
 const typeUserController = require('../controller/typeUserController');
+const villeController = require('../controller/villeController');
 const verifyToken = require('../middleware/authMiddleware');
 require('dotenv');
 
@@ -14,12 +15,15 @@ require('dotenv');
 //Route pour recuperer tous les utilisateurs
 router.get('/getUsers', userController.getAllUser);
 
+//suspendre un utilisateur
+router.post('/deleteUsers', userController.deleteUser);
+//activer un utilisateur
+router.post('/activeUsers', userController.activeUser);
+
 // Route pour s'inscrire sur l'app
 router.post('/register', userController.registerUser);
-
-// Route pour inscrire le type d'utilisateur
-router.post('/registerTypeUser', typeUserController.registerUser);
-
+// Route pour verifier si le user existe
+router.post('/verifUser', userController.verifExistUser);
 // Route pour connecter un utilisateur
 router.post('/connexion', userController.connexionUser);
 
@@ -35,5 +39,13 @@ router.post('/changePassword', userController.changePassword);
 //teste sms
 router.post('/sms', userController.testSms);
 // router.post('/mail', userController.testmail);
+
+
+// Route pour inscrire le type d'utilisateur
+router.post('/registerTypeUser', typeUserController.registerUser);
+router.get('/getTypeUser', typeUserController.getAllTypeUser);
+
+//Route pour enregistrer la ville
+router.get('/getVille', villeController.getAllVille);
 
 module.exports = router;

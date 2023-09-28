@@ -2,7 +2,8 @@ const express = require('express');
 const app = express();
 const sequelize = require('./config/bdConnect'); 
 const appRoutes = require('./routes/appRoute');
-
+const cors = require('cors');
+app.use(cors());
 // Middleware pour analyser les requêtes JSON
 app.use(express.json());
 

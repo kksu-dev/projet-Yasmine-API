@@ -91,6 +91,9 @@ module.exports = (sequelize, DataTypes) => {
     image: {
       type: DataTypes.STRING,
     },
+    ville: {
+      type: DataTypes.STRING,
+    },
     typeUserId: DataTypes.INTEGER,
     dateNaissance: {
       type: DataTypes.DATE,
@@ -100,6 +103,14 @@ module.exports = (sequelize, DataTypes) => {
     },
     resetToken:{
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    isConnect:{
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    },
+    isValid:{
+      type: DataTypes.BOOLEAN,
       allowNull: true,
     }
   }, {

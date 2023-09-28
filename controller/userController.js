@@ -1,7 +1,7 @@
 
 // const Utilisateur = require('../models/Utilisateur');
 const bcrypt = require('bcrypt');
-const { Utilisateur,Otp } = require('../models');
+const { Utilisateur,Otp,TypeUtilisateur } = require('../models');
 // const { sendEmail } = require('../mail/sendMail');
 const sendEmail = require('../mail/sendMail');
 
@@ -17,10 +17,14 @@ const crypto = require('crypto');
 
 // const { sendSMS } = require('../sms/senderSms');
 const { sendSMS } = require('../sms/sendSms');
+
 //Recuperer l'ensemble des utilisateurs
 const getAllUser = async (req,res) => {
   try {
-    const users = await Utilisateur.findAll(); // Récupérez tous les utilisateurs de la base de données
+    // const users = await Utilisateur.findAll(); // Récupérez tous les utilisateurs de la base de données
+    const users = await Utilisateur.findAll({
+      include: [TypeUtilisateur], // Effectuez une jointure avec la table TypeUser
+    });
 
     res.status(200).json({success:true, data:users});
   } catch (error) {
@@ -29,6 +33,23 @@ const getAllUser = async (req,res) => {
   }
 }
 
+const verifExistUser = async (req,res) => {
+  try {
+    const email = req.body.email;
+    const telephone = req.body.telephone;
+    const existingUser = await Utilisateur.findOne({ where: { email } });
+    const numberUser = await Utilisateur.findOne({ where: { telephone } });
+            if (existingUser) {
+              return res.status(400).json({ message: 'Cet utilisateur existe déjà.' });
+            }else if (numberUser) {
+                return res.status(400).json({ message: 'Ce numero de telephone existe déjà.' }); 
+            }else{
+              return res.status(400).json({ message: 'ok' }); 
+            }
+  } catch (error) {
+    
+  }
+}
 
 // Fonction pour créer un nouvel utilisateur
 const Storage = multer.diskStorage(
@@ -67,16 +88,16 @@ const registerUser = async (req, res, next) => {
             // const { nom,prenom,email, password,address,telephone,typeUserId,imageClient } = req.body;
         
             // Vérifier si l'utilisateur existe déjà
-            const email = req.body.email;
-            const telephone = req.body.telephone;
+            // const email = req.body.email;
+            // const telephone = req.body.telephone;
 
-            const existingUser = await Utilisateur.findOne({ where: { email } });
-            const numberUser = await Utilisateur.findOne({ where: { telephone } });
-            if (existingUser) {
-              return res.status(400).json({ message: 'Cet utilisateur existe déjà.' });
-            }else if (numberUser) {
-                return res.status(400).json({ message: 'Ce numero de telephone existe déjà.' }); 
-            }
+            // const existingUser = await Utilisateur.findOne({ where: { email } });
+            // const numberUser = await Utilisateur.findOne({ where: { telephone } });
+            // if (existingUser) {
+            //   return res.status(400).json({ message: 'Cet utilisateur existe déjà.' });
+            // }else if (numberUser) {
+            //     return res.status(400).json({ message: 'Ce numero de telephone existe déjà.' }); 
+            // }
 
         
             // Hacher le mot de passe
@@ -88,12 +109,15 @@ const registerUser = async (req, res, next) => {
               prenom:req.body.prenom,
               email:req.body.email,
               password: hashedPassword,
-              address:req.body.address,
+              // address:req.body.address,
               telephone:req.body.telephone,
               image : base64Image,
               typeUserId:req.body.typeUserId,
               dateNaissance:req.body.dateNaissance,
               genre:req.body.genre,
+              ville:req.body.ville,
+              isConnect:false,
+              isValid:true
             });
 
             
@@ -282,6 +306,8 @@ const connexionUser = async (req,res) => {
     }
   
     // Générez un token JWT
+    utilisateur.isConnect = true;
+    utilisateur.save();
     const token = jwt.sign({ utilisateur }, process.env.JWT_SECRET , { expiresIn: '24h' });
     // const jwtSecret = crypto.randomBytes(32).toString('hex');
     res.json({token:token});
@@ -328,6 +354,7 @@ const testSms = async (req,res) => {
       }
 }
 
+
 const testmail = async (req,res) => {
   
       // Envoyez le SMS de bienvenue à l'utilisateur
@@ -355,6 +382,38 @@ const test = async (req,res) => {
      res.json({ok:"bonjour"});
    
 }
+
+const deleteUser = async (req,res) => {
+
+  const { UtilisateurId } = req.body;
+
+  // Recherchez l'utilisateur par son nom d'utilisateur
+  const utilisateur = await Utilisateur.findOne({ where: { UtilisateurId } });
+  // return res.json({message:utilisateur.nom}) ;
+  if (!utilisateur) {
+    return res.status(401).json({ message: 'Cet utilisateur n\'existe pas' });
+  }
+  utilisateur.isValid = false;
+  utilisateur.save();
+  res.json({success:true,message: 'l\'utilisateur à été retiré.'});
+}
+
+const activeUser = async (req,res) => {
+
+  const { UtilisateurId } = req.body;
+
+  // Recherchez l'utilisateur par son nom d'utilisateur
+  const utilisateur = await Utilisateur.findOne({ where: { UtilisateurId } });
+  // return res.json({message:utilisateur.nom}) ;
+  if (!utilisateur) {
+    return res.status(401).json({ message: 'Cet utilisateur n\'existe pas' });
+  }
+  utilisateur.isValid = true;
+  utilisateur.save();
+  res.json({success:true,message: 'l\'utilisateur à été retiré.'});
+}
+
+
 module.exports = {
   registerUser,
   connexionUser,
@@ -366,5 +425,8 @@ module.exports = {
   verificationOtp,
   changePassword,
   getAllUser,
+  deleteUser,
+  activeUser,
+  verifExistUser,
   test
 };

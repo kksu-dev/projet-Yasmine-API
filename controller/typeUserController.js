@@ -1,23 +1,36 @@
 
 // const Utilisateur = require('../models/Utilisateur');
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 const { TypeUtilisateur } = require('../models');
+
+
+// const getAllTypeUser = async (req,res) => {
+//   try {
+//     const TypeUtilisateur = await TypeUtilisateur.findAll(); 
+
+//     res.status(200).json({success:true, data:TypeUtilisateur});
+//   } catch (error) {
+//     console.error('Erreur lors de la récupération des types utilisateurs :', error);
+//     res.status(500).json({ success:false,message: 'Une erreur est survenue lors de la récupération des types utilisateurs:',error });
+//   }
+// }
+
+const getAllTypeUser = async (req, res) => {
+  try {
+    const typeUtilisateurs = await TypeUtilisateur.findAll();
+
+    res.status(200).json({ success: true, data: typeUtilisateurs });
+  } catch (error) {
+    console.error('Erreur lors de la récupération des types utilisateurs :', error);
+    res.status(500).json({ success: false, message: 'Une erreur est survenue lors de la récupération des types utilisateurs:', error });
+  }
+};
+
 
 // Fonction pour créer un nouvel utilisateur
 const registerUser = async (req, res) => {
   try {
     const { libelle} = req.body;
-
-    // Vérifier si l'utilisateur existe déjà
-    // const existingUser = await Utilisateur.findOne({ where: { email } });
-    // if (existingUser) {
-    //   return res.status(400).json({ message: 'Cet utilisateur existe déjà.' });
-    // }
-
-    // // Hacher le mot de passe
-    // const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Créer un nouvel utilisateur
     const newUser = await TypeUtilisateur.create({
         libelle,
       
@@ -32,4 +45,5 @@ const registerUser = async (req, res) => {
 
 module.exports = {
   registerUser,
+  getAllTypeUser
 };
