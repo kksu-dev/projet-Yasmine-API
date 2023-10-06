@@ -35,10 +35,10 @@ module.exports = {
         allowNull: false,
         references: {
           model: 'CategorieProduits', // Nom de la table à laquelle la clé étrangère se réfère
-          key: 'categorieProduitId', // Nom de la colonne dans la table "Commandes" à laquelle la clé étrangère se réfère
+          key: 'categorieProduitId', // Nom de la colonne dans la table à laquelle la clé étrangère se réfère
         },
-        onUpdate: 'CASCADE', // Option de mise à jour en cascade si nécessaire
-        onDelete: 'CASCADE', // Option de suppression en cascade si nécessaire
+        onUpdate: 'CASCADE', 
+        onDelete: 'CASCADE', 
       },
       createdAt: {
         allowNull: false,

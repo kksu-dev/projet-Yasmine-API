@@ -112,7 +112,11 @@ module.exports = (sequelize, DataTypes) => {
     isValid:{
       type: DataTypes.BOOLEAN,
       allowNull: true,
-    }
+    },
+    accountManager:{
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   }, {
     sequelize,
     modelName: 'Utilisateur',

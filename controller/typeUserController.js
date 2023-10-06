@@ -19,10 +19,10 @@ const getAllTypeUser = async (req, res) => {
   try {
     const typeUtilisateurs = await TypeUtilisateur.findAll();
 
-    res.status(200).json({ success: true, data: typeUtilisateurs });
+    res.status(200).json({status:true, data: typeUtilisateurs });
   } catch (error) {
     console.error('Erreur lors de la récupération des types utilisateurs :', error);
-    res.status(500).json({ success: false, message: 'Une erreur est survenue lors de la récupération des types utilisateurs:', error });
+    res.status(500).json({ status:false, message: 'Une erreur est survenue lors de la récupération des types utilisateurs:', error });
   }
 };
 
@@ -39,7 +39,7 @@ const registerUser = async (req, res) => {
     return res.status(201).json(newUser);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Une erreur est survenue lors de l\'inscription.' });
+    return res.status(500).json({ status:false,message: 'Une erreur est survenue lors de l\'inscription.' });
   }
 };
 
