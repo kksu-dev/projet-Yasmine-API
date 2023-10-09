@@ -6,7 +6,7 @@ const typeUserController = require('../controller/typeUserController');
 const villeController = require('../controller/villeController');
 const categorieProductController = require('../controller/categorieProductController');
 const productController = require('../controller/productController');
-const verifyToken = require('../middleware/authMiddleware');
+// const verifyToken = require('../middleware/authMiddleware');
 const authenticateUser = require('../middleware/authMiddleware');
 require('dotenv');
 
@@ -30,8 +30,16 @@ router.post('/register', userController.registerUser);
 router.post('/registerAdmin',authenticateUser, adminUserController.registerAdminUser);
 // Route pour recuperer un user par son id
 router.post('/getUserById', adminUserController.getUserByIdForUpdate);
+// Route pour supprimer des users
+router.delete('/deleteUserById',authenticateUser, adminUserController.deleteAdminUser);
 // Route pour modifier un user 
 router.put('/updateUser',authenticateUser, adminUserController.updateAdminUser);
+
+// Route pour verifier le mot de passe 
+router.post('/verificationPassword',authenticateUser, adminUserController.verifPassword);
+// Route pour modifier le mot de passe 
+router.put('/updatePassword',authenticateUser, adminUserController.updatePassword);
+
 // Route pour verifier si le user existe
 router.post('/verifUser', userController.verifExistUser);
 // Route pour connecter un utilisateur
@@ -50,7 +58,7 @@ router.post('/verificationOtp', userController.verificationOtp);
 router.post('/changePassword', userController.changePassword);
 
 //teste sms
-router.post('/sms', userController.testSms);
+// router.post('/sms', userController.testSms);
 // router.post('/mail', userController.testmail);
 
 
@@ -84,4 +92,5 @@ router.get('/getProduit', productController.getAllProduit);
 router.put('/updateProduit',authenticateUser, productController.updateProduct);
 //route pour supprimer un produit
 router.delete('/deleteProduit',authenticateUser, productController.deleteProduct);
+
 module.exports = router;

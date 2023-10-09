@@ -301,24 +301,37 @@ const validOtpUser = async (req,res) => {
 
 //connecter un utilisateur
 const connexionUser = async (req,res) => {
-
     const { telephone, password } = req.body;
+    Utilisateur.findOne({
+      where: {
+        telephone: telephone 
+      }
+    }).then((utilisateur) => {
+      if (!utilisateur) {
+        return res.status(401).json({ status: false, message: 'Échec de l\'authentification' });
+      }
+    
+      // Vérification du mot de passe avec bcrypt
+      if (!bcrypt.compareSync(password, utilisateur.password)) {
+        return res.status(401).json({ status: false, message: 'Échec de l\'authentification' });
+      }
+      const userId=utilisateur.UtilisateurId;
+      utilisateur.isConnect = true;
+      utilisateur.save();
+       // Générez un token JWT
+      const message="Utilisateur connecté avec succés"
+    
+      const token = jwt.sign({userId}, process.env.JWT_SECRET , { expiresIn: '24h' });
+      // const jwtSecret = crypto.randomBytes(32).toString('hex');
+      return res.json({status:true,token:token,message:message});
+    }).catch((err) => {
+      // Gérer les erreurs de Sequelize ici
+      console.error(err);
+      return res.status(500).json({ status: false, message: 'Erreur interne du serveur' });
+    });
+
   
-    // Recherchez l'utilisateur par son nom d'utilisateur
-    const utilisateur = await Utilisateur.findOne({ where: { telephone } });
-    const userId=utilisateur.UtilisateurId
-    // return res.json({message:utilisateur.nom}) ;
-    if (!utilisateur || !bcrypt.compareSync(password, utilisateur.password)) {
-      return res.status(401).json({status:false, message: 'Nom d\'utilisateur ou mot de passe incorrect' });
-    }
-  
-    // Générez un token JWT
-    const message="Utilisateur connecté avec succés"
-    utilisateur.isConnect = true;
-    utilisateur.save();
-    const token = jwt.sign({userId}, process.env.JWT_SECRET , { expiresIn: '24h' });
-    // const jwtSecret = crypto.randomBytes(32).toString('hex');
-    return res.json({status:true,token:token,message:message});
+   
 }
 
 
@@ -352,44 +365,44 @@ const generateOtp = async (req,res) => {
     }
 }
 
-const testSms = async (req,res) => {
-    try {
-        // Envoyez le SMS de bienvenue à l'utilisateur
-        await main();
-        console.log('SMS envoyé avec succès');
-      } catch (error) {
-        console.error('Erreur lors de l\'envoi du SMS :', error);
-      }
-}
+// const testSms = async (req,res) => {
+//     try {
+//         // Envoyez le SMS de bienvenue à l'utilisateur
+//         await main();
+//         console.log('SMS envoyé avec succès');
+//       } catch (error) {
+//         console.error('Erreur lors de l\'envoi du SMS :', error);
+//       }
+// }
 
 
-const testmail = async (req,res) => {
+// const testmail = async (req,res) => {
   
-      // Envoyez le SMS de bienvenue à l'utilisateur
-      sendEmail(
-        'koffisergeulrich@gmail.com',
-        'otp',
-        '\
-        <h1>Titre de l\'e-mail</h1>\
-        <p>Contenu du message au format HTML</p>\
-        <div style="color:red">je suis bien ainsi</div>',
-      (error, info) => {
-        if (error) {
-          console.log('Erreur lors de l\'envoi de l\'e-mail :', error);
-        } else {
-          console.log('E-mail envoyé avec succès :', info.response);
-        }
-      }
-      );
+//       // Envoyez le SMS de bienvenue à l'utilisateur
+//       sendEmail(
+//         'koffisergeulrich@gmail.com',
+//         'otp',
+//         '\
+//         <h1>Titre de l\'e-mail</h1>\
+//         <p>Contenu du message au format HTML</p>\
+//         <div style="color:red">je suis bien ainsi</div>',
+//       (error, info) => {
+//         if (error) {
+//           console.log('Erreur lors de l\'envoi de l\'e-mail :', error);
+//         } else {
+//           console.log('E-mail envoyé avec succès :', info.response);
+//         }
+//       }
+//       );
    
-}
+// }
 
-const test = async (req,res) => {
+// const test = async (req,res) => {
   
-      // Envoyez le SMS de bienvenue à l'utilisateur
-     res.json({ok:"bonjour"});
+//       // Envoyez le SMS de bienvenue à l'utilisateur
+//      res.json({ok:"bonjour"});
    
-}
+// }
 
 const deleteUser = async (req,res) => {
 
@@ -441,8 +454,6 @@ module.exports = {
   connexionUser,
   validOtpUser,
   generateOtp,
-  testSms,
-  testmail,
   restPassword,
   verificationOtp,
   changePassword,
@@ -451,5 +462,5 @@ module.exports = {
   activeUser,
   deconnectUser,
   verifExistUser,
-  test
+
 };
